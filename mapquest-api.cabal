@@ -1,7 +1,7 @@
 name:                mapquest-api
 version:             0.1.0.0
--- synopsis:
--- description:
+synopsis:            Bindings to the MapQuest API
+description:         This library provides a high-level interface to the MapQuest API. Currently only the "geocoding" API (street address to coordinates) is provided, but the functionality is straightforward to extend.
 homepage:            https://github.com/ocramz/mapquest-api
 license:             BSD3
 license-file:        LICENSE
@@ -35,16 +35,16 @@ library
 --   build-depends:       base
 --                      , mapquest-api
 
-test-suite spec
-  default-language:    Haskell2010
-  ghc-options:         -Wall
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , mapquest-api
-                     , hspec
-                     , QuickCheck
+-- test-suite spec
+--   default-language:    Haskell2010
+--   ghc-options:         -Wall
+--   type:                exitcode-stdio-1.0
+--   hs-source-dirs:      test
+--   main-is:             Spec.hs
+--   build-depends:       base
+--                      , mapquest-api
+--                      , hspec
+--                      , QuickCheck
 
 source-repository head
   type:     git
