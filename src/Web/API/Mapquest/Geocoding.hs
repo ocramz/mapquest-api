@@ -1,4 +1,4 @@
-{-# language OverloadedStrings, DataKinds #-}
+{-# language OverloadedStrings, DataKinds, DeriveGeneric #-}
 module Web.API.Mapquest.Geocoding where
 
 import Data.List (intersperse)
@@ -6,11 +6,15 @@ import Data.Monoid (mempty, (<>))
 
 import Network.HTTP.Req
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T (encodeUtf8, decodeUtf8)
 import qualified Data.ByteString.Lazy as LBS
+
+import GHC.Generics
 
 import Control.Monad.Catch
 
 import Data.Aeson
+import Data.Aeson.Types (Parser(..), parseMaybe, parseEither)
 
 -- https://developer.mapquest.com/documentation/geocoding-api/address/get/
 
@@ -26,29 +30,59 @@ instance MonadHttp IO where
 
 request ::
      T.Text
-  -> Option 'Http
   -> GeoQuery
-  -> IO LBS.ByteString
-request apikey opts q = do
+  -> IO (Maybe (Coords Float))
+request apikey q = do
   r <- req GET apiRootPath NoReqBody lbsResponse opts'
-  return $ responseBody r where
-    opts' = opts <>
+  return $ decoder1 $ responseBody r where
+    opts' = 
       ("key" =: apikey) <>
       ("outFormat" =: ("json" :: T.Text)) <>
       ("location" =: renderGeoQuery q)
 
 
+
+decoder1 :: LBS.ByteString -> Maybe (Coords Float)
+decoder1 dat = do
+  r <- decode dat
+  flip parseMaybe r $ \obj -> do 
+    locp <- decodeLocation obj
+    decodeLatLong locp
+
+decodeLocation :: FromJSON a => Object -> Parser a
+decodeLocation obj = do
+    (res0 : _) <- obj .: "results"
+    (loc0 : _) <- res0 .: "locations"
+    return loc0
+
+decodeLatLong :: Object -> Parser (Coords Float)
+decodeLatLong loc = do
+    ll <- loc .: "latLng"
+    Coords <$> ll .: "lat" <*> ll .: "lng"
+    
+    
+data Coords a = Coords {
+    lat :: a
+  , long :: a } deriving (Eq, Show, Generic)
+
+-- instance Functor Coords where
+--   fmap f (Coords x y) = Coords (f x) (f y)
+
+-- instance FromJSON a => FromJSON (Coords a)
+
+
+
 data GeoQuery = GQ {
     gqStreet :: T.Text
   , gqCity :: T.Text
-  , gqCountry :: T.Text
-                                 } deriving (Eq, Show)
+  , gqCountry :: T.Text } deriving (Eq, Show)
 
 renderGeoQuery :: GeoQuery -> T.Text
 renderGeoQuery (GQ addr city country) =
   T.concat $ intersperse ", " [addr, city, country]
 
-options :: Foldable t => t (T.Text, T.Text) -> Option 'Http
-options = foldr (\(k, v) acc  -> (k =: v) <> acc ) mempty
+-- options :: Foldable t => t (T.Text, T.Text) -> Option 'Http
+-- options = foldr (\(k, v) acc  -> (k =: v) <> acc ) mempty
+
 
 
