@@ -1,12 +1,20 @@
 {-# language OverloadedStrings, DataKinds, DeriveGeneric #-}
-module Web.API.Mapquest.Geocoding (request, GeoQuery(..), Coords(..))where
+{-|
+Module      : Web.API.MapQuest.Geocoding
+Description : Geocoding interface
+Copyright   : (c) Marco Zocca, 2018
+License     : GPL-3
+Maintainer  : zocca.marco gmail
+Stability   : experimental
+Portability : POSIX
+-}
+module Web.API.MapQuest.Geocoding (request, GeoQuery(..), Coords(..))where
 
 import Data.List (intersperse)
-import Data.Monoid (mempty, (<>))
+import Data.Monoid ((<>))
 
 import Network.HTTP.Req
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as T (encodeUtf8, decodeUtf8)
 import qualified Data.ByteString.Lazy as LBS
 
 import GHC.Generics
@@ -14,7 +22,7 @@ import GHC.Generics
 import Control.Monad.Catch
 
 import Data.Aeson
-import Data.Aeson.Types (Parser(..), parseMaybe, parseEither)
+import Data.Aeson.Types (Parser, parseMaybe)
 
 -- https://developer.mapquest.com/documentation/geocoding-api/address/get/
 
@@ -40,7 +48,7 @@ instance MonadHttp IO where
 -- Just (Coords {lat = 22.264412, long = 114.16706})
 
 request ::
-     T.Text  -- ^ API key (available for free on mapquestapi.com)
+     T.Text  -- ^ API key (available for free on <https://developer.mapquest.com>)
   -> GeoQuery -- ^ Query address
   -> IO (Maybe (Coords Float))
 request apikey q = do
@@ -82,10 +90,8 @@ data Coords a = Coords {
 
 -- instance FromJSON a => FromJSON (Coords a)
 
-mkQuery :: T.Text -> T.Text -> T.Text -> GeoQuery
-mkQuery = GQ
 
--- | Geocoding query 
+-- | Geocoding query parameters
 data GeoQuery = GQ {
     gqStreet :: T.Text -- ^ Street address (e.g. \"Via Irnerio\")
   , gqCity :: T.Text   -- ^ City (e.g. \"Bologna\")
