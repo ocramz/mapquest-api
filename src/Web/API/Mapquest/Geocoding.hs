@@ -1,10 +1,12 @@
 {-# language OverloadedStrings, DataKinds #-}
 module Web.API.Mapquest.Geocoding where
 
-import Data.Monoid
+import Data.List (intersperse)
+import Data.Monoid (mempty, (<>))
 
 import Network.HTTP.Req
 import qualified Data.Text as T
+import qualified Data.ByteString.Lazy as LBS
 
 import Control.Monad.Catch
 
@@ -22,21 +24,29 @@ apiRootPath = http "www.mapquestapi.com" /: "geocoding" /: "v1" /: "address"
 instance MonadHttp IO where
   handleHttpException = throwM
 
-request :: FromJSON a => T.Text -> Option 'Http -> IO a
-request apikey opts = do
-  r <- req GET apiRootPath NoReqBody jsonResponse opts'
+request ::
+     T.Text
+  -> Option 'Http
+  -> GeoQuery
+  -> IO LBS.ByteString
+request apikey opts q = do
+  r <- req GET apiRootPath NoReqBody lbsResponse opts'
   return $ responseBody r where
-    opts' = opts <> ("key" =: apikey) <> ("outFormat" =: ("json" :: T.Text))
+    opts' = opts <>
+      ("key" =: apikey) <>
+      ("outFormat" =: ("json" :: T.Text)) <>
+      ("location" =: renderGeoQuery q)
 
--- data ApiOptions = ApiOptions {
---     aoLocation :: T.Text
---                              } deriving (Eq, Show)
 
-data GeocodingQuery = GeocodingQuery {
-    gqCity :: T.Text
+data GeoQuery = GQ {
+    gqStreet :: T.Text
+  , gqCity :: T.Text
   , gqCountry :: T.Text
                                  } deriving (Eq, Show)
 
+renderGeoQuery :: GeoQuery -> T.Text
+renderGeoQuery (GQ addr city country) =
+  T.concat $ intersperse ", " [addr, city, country]
 
 options :: Foldable t => t (T.Text, T.Text) -> Option 'Http
 options = foldr (\(k, v) acc  -> (k =: v) <> acc ) mempty
