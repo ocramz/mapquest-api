@@ -1,5 +1,5 @@
 {-# language OverloadedStrings, DataKinds, DeriveGeneric #-}
-module Web.API.Mapquest.Geocoding where
+module Web.API.Mapquest.Geocoding (request, GeoQuery(..), Coords(..))where
 
 import Data.List (intersperse)
 import Data.Monoid (mempty, (<>))
@@ -28,6 +28,7 @@ apiRootPath = http "www.mapquestapi.com" /: "geocoding" /: "v1" /: "address"
 instance MonadHttp IO where
   handleHttpException = throwM
 
+-- | Call the MapQuest Geocoding API with a given address and extract the coordinates from the parsed result
 request ::
      T.Text
   -> GeoQuery
@@ -60,10 +61,11 @@ decodeLatLong loc = do
     ll <- loc .: "latLng"
     Coords <$> ll .: "lat" <*> ll .: "lng"
     
-    
+-- | Coordinates
 data Coords a = Coords {
-    lat :: a
-  , long :: a } deriving (Eq, Show, Generic)
+    lat :: a -- ^ Latitude
+  , long :: a -- ^ Longitude
+  } deriving (Eq, Show, Generic)
 
 -- instance Functor Coords where
 --   fmap f (Coords x y) = Coords (f x) (f y)
@@ -71,11 +73,12 @@ data Coords a = Coords {
 -- instance FromJSON a => FromJSON (Coords a)
 
 
-
+-- | Geocoding query 
 data GeoQuery = GQ {
-    gqStreet :: T.Text
-  , gqCity :: T.Text
-  , gqCountry :: T.Text } deriving (Eq, Show)
+    gqStreet :: T.Text -- ^ Street address
+  , gqCity :: T.Text   -- ^ City 
+  , gqCountry :: T.Text -- ^ Country
+  } deriving (Eq, Show)
 
 renderGeoQuery :: GeoQuery -> T.Text
 renderGeoQuery (GQ addr city country) =
