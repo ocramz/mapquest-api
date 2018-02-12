@@ -28,10 +28,16 @@ apiRootPath = http "www.mapquestapi.com" /: "geocoding" /: "v1" /: "address"
 instance MonadHttp IO where
   handleHttpException = throwM
 
--- | Call the MapQuest Geocoding API with a given address and extract the coordinates from the parsed result
+-- | Call the MapQuest Geocoding API with a given address and extract the coordinates from the parsed result.
+--
+-- Example usage : assuming the user has bound /key/ to hold the API key string, the following can be run in a GHCi shell :
+--
+-- >>> request key (GQ "Via Righi" "Bologna" "Italy")
+-- Just (Coords {lat = 44.49897, long = 11.34503})
+
 request ::
-     T.Text
-  -> GeoQuery
+     T.Text  -- ^ API key (available for free on mapquestapi.com)
+  -> GeoQuery -- ^ Query address
   -> IO (Maybe (Coords Float))
 request apikey q = do
   r <- req GET apiRootPath NoReqBody lbsResponse opts'
@@ -72,12 +78,14 @@ data Coords a = Coords {
 
 -- instance FromJSON a => FromJSON (Coords a)
 
+mkQuery :: T.Text -> T.Text -> T.Text -> GeoQuery
+mkQuery = GQ
 
 -- | Geocoding query 
 data GeoQuery = GQ {
-    gqStreet :: T.Text -- ^ Street address
-  , gqCity :: T.Text   -- ^ City 
-  , gqCountry :: T.Text -- ^ Country
+    gqStreet :: T.Text -- ^ Street address (e.g. \"Via Irnerio\")
+  , gqCity :: T.Text   -- ^ City (e.g. \"Bologna\")
+  , gqCountry :: T.Text -- ^ Country (e.g. \"Italy\")
   } deriving (Eq, Show)
 
 renderGeoQuery :: GeoQuery -> T.Text
