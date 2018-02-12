@@ -22,6 +22,8 @@ library
                        Web.API.Mapquest.Geocoding
   build-depends:       base >= 4.7 && < 5
                      , req
+                     , bytestring
+                     , text
                      , aeson
                      , exceptions
 
