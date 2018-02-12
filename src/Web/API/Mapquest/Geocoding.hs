@@ -30,10 +30,14 @@ instance MonadHttp IO where
 
 -- | Call the MapQuest Geocoding API with a given address and extract the coordinates from the parsed result.
 --
--- Example usage : assuming the user has bound /key/ to hold the API key string, the following can be run in a GHCi shell :
+-- Example usage :
+-- assuming the user has bound /key/ to hold the API key string, the following can be run in a GHCi shell :
 --
--- >>> request key (GQ "Via Righi" "Bologna" "Italy")
+-- >>> request key (GQ "Via Irnerio" "Bologna" "Italy")
 -- Just (Coords {lat = 44.49897, long = 11.34503})
+--
+-- >>> request key (GQFree "Hong Kong")
+-- Just (Coords {lat = 22.264412, long = 114.16706})
 
 request ::
      T.Text  -- ^ API key (available for free on mapquestapi.com)
@@ -86,11 +90,14 @@ data GeoQuery = GQ {
     gqStreet :: T.Text -- ^ Street address (e.g. \"Via Irnerio\")
   , gqCity :: T.Text   -- ^ City (e.g. \"Bologna\")
   , gqCountry :: T.Text -- ^ Country (e.g. \"Italy\")
-  } deriving (Eq, Show)
+  }
+  | GQFree T.Text -- ^ Free-text query (must be a valid address or location)
+  deriving (Eq, Show)
 
 renderGeoQuery :: GeoQuery -> T.Text
-renderGeoQuery (GQ addr city country) =
-  T.concat $ intersperse ", " [addr, city, country]
+renderGeoQuery q = case q of
+  (GQ addr city country) -> T.concat $ intersperse ", " [addr, city, country]
+  (GQFree t) -> t 
 
 -- options :: Foldable t => t (T.Text, T.Text) -> Option 'Http
 -- options = foldr (\(k, v) acc  -> (k =: v) <> acc ) mempty
