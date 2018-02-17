@@ -78,7 +78,7 @@ request ::
      GeoQuery -- ^ Query address
   -> WebApiM MapQuest (Maybe (Coords Float))
 request q = do
-  key <- asks (apiKey . credentials) -- apiKey
+  key <- asks (apiKey . credentials) 
   r <- req GET apiRootPath NoReqBody lbsResponse (opts' key)
   -- return undefined
   return $ decoder1 $ responseBody r where
