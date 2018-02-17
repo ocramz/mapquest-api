@@ -20,7 +20,7 @@ import Data.List (intersperse)
 import Data.Monoid ((<>))
 
 -- import "mtl" Control.Monad.Reader.Class
--- import qualified "transformers" Control.Monad.Trans.Reader as RT (ReaderT(..), ask, local, reader, asks, runReaderT)
+import qualified "transformers" Control.Monad.Trans.Reader as RT (ReaderT(..), ask, local, reader, asks, runReaderT)
 import Control.Monad.IO.Class
 
 import Network.HTTP.Req
@@ -77,7 +77,7 @@ request ::
      GeoQuery -- ^ Query address
   -> WebApiM MapQuest (Maybe (Coords Float))
 request q = do
-  key <- asks apiKey
+  key <- RT.asks apiKey
   r <- req GET apiRootPath NoReqBody lbsResponse (opts' key)
   return $ decoder1 $ responseBody r where
     opts' k = 

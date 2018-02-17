@@ -22,6 +22,7 @@ library
   other-modules:       Web.API.MapQuest.Geocoding
   build-depends:       base >= 4.7 && < 5
                      , goggles
+                     , transformers
                      , req
                      , bytestring
                      , text
