@@ -23,6 +23,7 @@ library
   build-depends:       base >= 4.7 && < 5
                      , goggles
                      , transformers
+                     , mtl
                      , req
                      , bytestring
                      , text
