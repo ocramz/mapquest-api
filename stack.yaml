@@ -24,6 +24,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps: 
 - goggles-0.2
+- ghc-8.2.1
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -77,13 +77,15 @@ request ::
      GeoQuery -- ^ Query address
   -> WebApiM MapQuest (Maybe (Coords Float))
 request q = do
-  key <- RT.asks apiKey
+  key <- RT.asks (apiKey . credentials) -- apiKey
   r <- req GET apiRootPath NoReqBody lbsResponse (opts' key)
-  return $ decoder1 $ responseBody r where
-    opts' k = 
-      ("key" =: k) <>
-      ("outFormat" =: ("json" :: T.Text)) <>
-      ("location" =: renderGeoQuery q)
+  return undefined
+  -- return $ decoder1 $ responseBody r where
+  --   opts' k = 
+  --     ("key" =: k) <>
+  --     ("outFormat" =: ("json" :: T.Text)) <>
+  --     ("location" =: renderGeoQuery q)
+
 
 
 
