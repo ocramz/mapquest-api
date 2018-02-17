@@ -1,4 +1,4 @@
-resolver: lts-9.21
+resolver: lts-10.5
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -22,7 +22,8 @@ packages:
 - .
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-# extra-deps: []
+extra-deps: 
+- goggles-0.2
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

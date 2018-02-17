@@ -21,6 +21,7 @@ library
   exposed-modules:     Web.API.MapQuest
   other-modules:       Web.API.MapQuest.Geocoding
   build-depends:       base >= 4.7 && < 5
+                     , goggles
                      , req
                      , bytestring
                      , text

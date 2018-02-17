@@ -1,4 +1,8 @@
 {-# language OverloadedStrings, DataKinds, DeriveGeneric #-}
+{-# language DeriveFunctor, GeneralizedNewtypeDeriving, FlexibleInstances, MultiParamTypeClasses #-}
+{-# language PackageImports #-}
+{-# language TypeFamilies #-}
+
 {-|
 Module      : Web.API.MapQuest.Geocoding
 Description : Geocoding interface
@@ -8,10 +12,16 @@ Maintainer  : zocca.marco gmail
 Stability   : experimental
 Portability : POSIX
 -}
-module Web.API.MapQuest.Geocoding (request, GeoQuery(..), Coords(..))where
+module Web.API.MapQuest.Geocoding
+  -- (request, GeoQuery(..), Coords(..))
+   where
 
 import Data.List (intersperse)
 import Data.Monoid ((<>))
+
+-- import "mtl" Control.Monad.Reader.Class
+-- import qualified "transformers" Control.Monad.Trans.Reader as RT (ReaderT(..), ask, local, reader, asks, runReaderT)
+import Control.Monad.IO.Class
 
 import Network.HTTP.Req
 import qualified Data.Text as T
@@ -24,17 +34,27 @@ import Control.Monad.Catch
 import Data.Aeson
 import Data.Aeson.Types (Parser, parseMaybe)
 
+import Network.Goggles
+
 -- https://developer.mapquest.com/documentation/geocoding-api/address/get/
 
 apiRootPath :: Url 'Http
 apiRootPath = http "www.mapquestapi.com" /: "geocoding" /: "v1" /: "address"
 
 
+data Creds = Creds { apiKey :: T.Text } deriving (Eq, Show)
+
+data MapQuest
+
+instance HasCredentials MapQuest where
+  type Credentials MapQuest = Creds
+
+instance MonadHttp (WebApiM MapQuest) where
+  handleHttpException = throwM
+
 -- example request :
 -- GET http://www.mapquestapi.com/geocoding/v1/address?key=KEY&location=Washington,DC
 
-instance MonadHttp IO where
-  handleHttpException = throwM
 
 -- | Call the MapQuest Geocoding API with a given address and extract the coordinates from the parsed result.
 --
@@ -47,15 +67,21 @@ instance MonadHttp IO where
 -- >>> request key (GQFree "Hong Kong")
 -- Just (Coords {lat = 22.264412, long = 114.16706})
 
+
+
+
+-- request = undefined
+
 request ::
-     T.Text  -- ^ API key (available for free on <https://developer.mapquest.com>)
-  -> GeoQuery -- ^ Query address
-  -> IO (Maybe (Coords Float))
-request apikey q = do
-  r <- req GET apiRootPath NoReqBody lbsResponse opts'
+     -- T.Text  -- ^ API key (available for free on <https://developer.mapquest.com>)
+     GeoQuery -- ^ Query address
+  -> WebApiM MapQuest (Maybe (Coords Float))
+request q = do
+  key <- asks apiKey
+  r <- req GET apiRootPath NoReqBody lbsResponse (opts' key)
   return $ decoder1 $ responseBody r where
-    opts' = 
-      ("key" =: apikey) <>
+    opts' k = 
+      ("key" =: k) <>
       ("outFormat" =: ("json" :: T.Text)) <>
       ("location" =: renderGeoQuery q)
 
