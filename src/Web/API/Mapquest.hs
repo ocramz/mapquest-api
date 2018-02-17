@@ -9,7 +9,8 @@ Portability : POSIX
 -}
 module Web.API.MapQuest (
   -- * Geocoding
-  G.request,
+  G.runRequest,  
+  G.Creds(..), 
   -- ** Parameters
   G.GeoQuery(..),
   -- ** Output

@@ -1,5 +1,5 @@
 name:                mapquest-api
-version:             0.2.0.0
+version:             0.3
 synopsis:            Bindings to the MapQuest API
 description:         This library provides a high-level interface to the MapQuest API. Currently only the "geocoding" API (street address to coordinates) is provided, but the functionality is straightforward to extend.
 homepage:            https://github.com/ocramz/mapquest-api
@@ -22,7 +22,6 @@ library
   other-modules:       Web.API.MapQuest.Geocoding
   build-depends:       base >= 4.7 && < 5
                      , goggles
-                     , transformers
                      , mtl
                      , req
                      , bytestring
