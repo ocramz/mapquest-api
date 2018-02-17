@@ -46,9 +46,9 @@ data MapQuest
 
 instance HasCredentials MapQuest where
   type Credentials MapQuest = Creds
-  type Options MapQuest = ()      -- NB: Options and TokenContent are moved to HasToken in goggles-0.3
-  type TokenContent MapQuest = ()
-  tokenFetch = undefined
+  -- type Options MapQuest = ()      -- NB: Options and TokenContent are moved to HasToken in goggles-0.3
+  -- type TokenContent MapQuest = ()
+  -- tokenFetch = undefined
 
 instance MonadHttp (WebApiM MapQuest) where
   handleHttpException = throwM
@@ -86,7 +86,7 @@ request q = do
 runRequest ::
   Creds -> GeoQuery -> IO (Maybe (Coords Float))
 runRequest k q = do
-  h <- createHandle k ()
+  h <- createHandle k undefined
   evalWebApiIO h (request q)
 
 
